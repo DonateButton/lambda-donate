@@ -1,0 +1,33 @@
+{
+  "name": "lambda-donate",
+  "version": "1.0.0",
+  "description": "Donate's money and sends a text message.",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha *.test.js",
+    "makezip": "zip -r -X deploy.zip index.js donations.js guid.js node_modules/lodash",
+    "deletezip": "rm -f deploy.zip",
+    "deploy": "npm run deletezip && npm run makezip && node build --destroy --build",
+    "update": "npm run deletezip && npm run makezip && node build --update"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DonateButton/lambda-donate.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/DonateButton/lambda-donate/issues"
+  },
+  "homepage": "https://github.com/DonateButton/lambda-donate#readme",
+  "dependencies": {
+    "lodash": "^4.17.4"
+  },
+  "devDependencies": {
+    "aws-sdk": "^2.53.0",
+    "chai": "^3.5.0",
+    "chai-as-promised": "^6.0.0",
+    "mocha": "^3.4.1"
+  }
+}
