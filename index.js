@@ -7,6 +7,14 @@ const {
     putDonation,
     listDonations
 } = require('./donations');
+const {
+    putOrganization,
+    listOrganizations
+} = require('./organizations');
+const {
+    putSetting,
+    listSettings
+} = require('./settings');
 
 const getErrorResponse = (errors)=>
 {
@@ -93,7 +101,15 @@ const handler = (event, context, callback) =>
    // putDonation
 //    return putDonation(5);
 
-    return listDonations();
+    // return listDonations();
+
+    // return putOrganization('Wounded Warrior');
+
+    // return listOrganizations();
+
+    // return putSetting('b67861c2-020a-c65e-70c8-6bae3efa310f', 1);
+
+    // return listSettings();
 };
 
 module.exports = {
