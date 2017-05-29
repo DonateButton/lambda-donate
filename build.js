@@ -95,7 +95,7 @@ const listFunctions = (lambda, callback)=>
     });
 };
 
-const FUNCTION_NAME       = 'donate';
+const FUNCTION_NAME       = 'button-api';
 const ROLE                = 'arn:aws:iam::089724945947:role/lambda_basic_execution';
 
 const createFunction = (lambda, fs, callback)=>

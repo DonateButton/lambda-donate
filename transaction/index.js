@@ -5,7 +5,7 @@ const AWS      = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB({region: 'us-east-1'});
 const guid = require('../guid');
 
-const createTransaction = (dynamodb, organizationID, amount) =>
+const _createTransaction = (dynamodb, organizationID, amount) =>
 {
     return new Promise((success, failure)=>
     {
@@ -33,7 +33,7 @@ const createTransaction = (dynamodb, organizationID, amount) =>
     }); 
 };
 
-const listTransactions = ()=>
+const _listTransactions = ()=>
 {
     return new Promise((success, failure)=>
     {
@@ -65,9 +65,13 @@ const listTransactions = ()=>
     }); 
 };
 
+const createTransaction = _.partial(_createTransaction, dynamodb);
+const listTransactions = _.partial(_listTransactions, dynamodb);
 module.exports = {
     createTransaction,
-    listTransactions
+    listTransactions,
+    _createTransaction,
+    _listTransactions
 };
 
 // createTransaction(dynamodb, '123', 2)

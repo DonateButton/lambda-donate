@@ -5,7 +5,7 @@ const AWS      = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB({region: 'us-east-1'});
 const guid = require('../guid');
 
-const createUser = (dynamodb, firstName, lastName, avatarURL) =>
+const _createUser = (dynamodb, firstName, lastName, avatarURL) =>
 {
     return new Promise((success, failure)=>
     {
@@ -33,7 +33,7 @@ const createUser = (dynamodb, firstName, lastName, avatarURL) =>
     }); 
 };
 
-const listUsers = dynamodb =>
+const _listUsers = dynamodb =>
 {
     return new Promise((success, failure)=>
     {
@@ -65,9 +65,13 @@ const listUsers = dynamodb =>
     }); 
 };
 
+const createUser = _.partial(_createUser, dynamodb);
+const listUsers = _.partial(_listUsers, dynamodb);
 module.exports = {
     createUser,
-    listUsers
+    listUsers,
+    _createUser,
+    _listUsers
 };
 
 // createUser(dynamodb, 'Jesse', 'Cow', '')

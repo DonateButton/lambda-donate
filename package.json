@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha *.test.js",
-    "makezip": "zip -r -X deploy.zip index.js donations.js guid.js node_modules/lodash",
+    "makezip": "zip -r -X deploy.zip index.js guid.js account setting transaction user node_modules/lodash",
     "deletezip": "rm -f deploy.zip",
     "deploy": "npm run deletezip && npm run makezip && node build --destroy --build",
     "update": "npm run deletezip && npm run makezip && node build --update"
