@@ -3,9 +3,9 @@ const _ = require('lodash');
 const log = console.log;
 const AWS      = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB({region: 'us-east-1'});
-const guid = require('./guid');
+const guid = require('../guid');
 
-const putSetting = (organizationID, amount) =>
+const createSetting = (dynamodb, organizationID, amount) =>
 {
     return new Promise((success, failure)=>
     {
@@ -18,7 +18,7 @@ const putSetting = (organizationID, amount) =>
                 amount: {"S": amount.toString()}
             },
             ReturnConsumedCapacity: "TOTAL", 
-            TableName: "donate_settings"
+            TableName: "button_settings"
         };
         dynamodb.putItem(params, (err, data)=>
         {
@@ -33,14 +33,14 @@ const putSetting = (organizationID, amount) =>
     }); 
 };
 
-const listSettings = ()=>
+const listSettings = dynamodb =>
 {
     return new Promise((success, failure)=>
     {
         var params = {
             Limit: 25,
             Select: 'ALL_ATTRIBUTES',
-            TableName: "donate_settings"
+            TableName: "button_settings"
         };
         dynamodb.scan(params, (err, data)=>
         {
@@ -66,6 +66,14 @@ const listSettings = ()=>
 };
 
 module.exports = {
-    putSetting,
+    createSetting,
     listSettings
 };
+
+// listSettings(dynamodb)
+// .then(result => log("result:", result))
+// .catch(error => log("error:", error));
+
+// createSetting(dynamodb, '123', 123)
+// .then(result => log("result:", result))
+// .catch(error => log("error:", error));

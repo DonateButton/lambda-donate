@@ -3,9 +3,9 @@ const _ = require('lodash');
 const log = console.log;
 const AWS      = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB({region: 'us-east-1'});
-const guid = require('./guid');
+const guid = require('../guid');
 
-const putOrganization = name =>
+const createAccount = (dynamodb, name, amount) =>
 {
     return new Promise((success, failure)=>
     {
@@ -14,15 +14,16 @@ const putOrganization = name =>
             Item: {
                 id: {"S": guid()},
                 name: {"S": name},
-                date: {"S": date.toString()}
+                amount: {"N": amount.toString()},
+                creationDate: {"S": date.toString()}
             },
             ReturnConsumedCapacity: "TOTAL", 
-            TableName: "donate_organizations"
+            TableName: "button_accounts"
         };
         dynamodb.putItem(params, (err, data)=>
         {
-            log("putOrganization err:", err);
-            log("putOrganization data:", data);
+            log("createAccount err:", err);
+            log("createAccount data:", data);
             if(err)
             {
                 return failure(err);
@@ -32,14 +33,14 @@ const putOrganization = name =>
     }); 
 };
 
-const listOrganizations = ()=>
+const listAccounts = dynamodb =>
 {
     return new Promise((success, failure)=>
     {
         var params = {
             Limit: 25,
             Select: 'ALL_ATTRIBUTES',
-            TableName: "donate_organizations"
+            TableName: "button_accounts"
         };
         dynamodb.scan(params, (err, data)=>
         {
@@ -54,7 +55,8 @@ const listOrganizations = ()=>
                 return {
                     id: _.get(item, 'id.S'),
                     name: _.get(item, 'name.S'),
-                    date: new Date(_.get(item, 'date.S'))
+                    amount: parseInt(_.get(item, 'amount.N')),
+                    creationDate: new Date(_.get(item, 'creationDate.S'))
                 };
             })
             .value();
@@ -64,6 +66,24 @@ const listOrganizations = ()=>
 };
 
 module.exports = {
-    putOrganization,
-    listOrganizations
+    createAccount,
+    listAccounts
 };
+
+// createAccount(dynamodb, 'cow', 2)
+// .then(result => log("result:", result))
+// .catch(error => log("error:", error));
+
+// listAccounts(dynamodb)
+// .then(result => log("result:", result))
+// .catch(error => log("error:", error));
+
+
+// { ConsumedCapacity: { TableName: 'button_accounts', CapacityUnits: 1 } }
+// result: { ConsumedCapacity: { TableName: 'button_accounts', CapacityUnits: 1 } }
+
+
+// result: [ { id: '68632684-b7ed-16cd-5e7a-fbfdcd7c03d5',
+//     name: 'cow',
+//     amount: undefined,
+//     creationDate: 2017-05-29T12:21:27.000Z } ]

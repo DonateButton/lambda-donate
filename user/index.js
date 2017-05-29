@@ -3,9 +3,9 @@ const _ = require('lodash');
 const log = console.log;
 const AWS      = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB({region: 'us-east-1'});
-const guid = require('./guid');
+const guid = require('../guid');
 
-const putDonation = amount =>
+const createUser = (dynamodb, firstName, lastName, avatarURL) =>
 {
     return new Promise((success, failure)=>
     {
@@ -13,16 +13,17 @@ const putDonation = amount =>
          const params = {
             Item: {
                 id: {"S": guid()},
-                amount: {"S": amount.toString()},
-                date: {"S": date.toString()}
+                firstName: {"S": firstName},
+                lastName: {"S": lastName},
+                creationDate: {"S": date.toString()}
             },
             ReturnConsumedCapacity: "TOTAL", 
-            TableName: "donations"
+            TableName: "button_users"
         };
         dynamodb.putItem(params, (err, data)=>
         {
-            log("putDonation err:", err);
-            log("putDonation data:", data);
+            log("createUser err:", err);
+            log("createUser data:", data);
             if(err)
             {
                 return failure(err);
@@ -32,14 +33,14 @@ const putDonation = amount =>
     }); 
 };
 
-const listDonations = ()=>
+const listUsers = dynamodb =>
 {
     return new Promise((success, failure)=>
     {
         var params = {
             Limit: 25,
             Select: 'ALL_ATTRIBUTES',
-            TableName: "donations"
+            TableName: "button_users"
         };
         dynamodb.scan(params, (err, data)=>
         {
@@ -53,8 +54,9 @@ const listDonations = ()=>
             {
                 return {
                     id: _.get(item, 'id.S'),
-                    amount: parseInt(_.get(item, 'amount.S')),
-                    date: new Date(_.get(item, 'date.S'))
+                    firstName: _.get(item, 'firstName.S'),
+                    lastName: _.get(item, 'lastName.S'),
+                    creationDate: new Date(_.get(item, 'creationDate.S'))
                 };
             })
             .value();
@@ -64,6 +66,14 @@ const listDonations = ()=>
 };
 
 module.exports = {
-    putDonation,
-    listDonations
+    createUser,
+    listUsers
 };
+
+// createUser(dynamodb, 'Jesse', 'Cow', '')
+// .then(result => log("result:", result))
+// .catch(error => log("error:", error));
+
+// listUsers(dynamodb)
+// .then(result => log("result:", result))
+// .catch(error => log("error:", error));

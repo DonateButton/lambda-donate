@@ -3,18 +3,6 @@ const _ = require('lodash');
 const log = console.log;
 const AWS      = require('aws-sdk');
 const sns = new AWS.SNS();
-const {
-    putDonation,
-    listDonations
-} = require('./donations');
-const {
-    putOrganization,
-    listOrganizations
-} = require('./organizations');
-const {
-    putSetting,
-    listSettings
-} = require('./settings');
 
 const getErrorResponse = (errors)=>
 {
@@ -69,59 +57,9 @@ const handler = (event, context, callback) =>
     {
         return getErrorResponse(['No context was passed to the handler.']);
     }
-
-    // send a text message
-
-    // return sendTextMessage()
-    // .then(result =>
-    // {
-    //      callback(undefined, 'sup');
-    // })
-    // .catch(error =>
-    // {
-    //     callback(error);
-    // });
-
-    // list the tables in DynamoDB
-
-    // return new Promise((success, failure)=>
-    // {
-    //     dynamodb.listTables({}, (err, data)=>
-    //     {
-    //         log("err:", err);
-    //         log("data:", data);
-    //         if(err)
-    //         {
-    //             return failure(err);
-    //         }
-    //         return success(data);
-    //     });
-    // });
-   
-   // putDonation
-//    return putDonation(5);
-
-    // return listDonations();
-
-    // return putOrganization('Wounded Warrior');
-
-    // return listOrganizations();
-
-    // return putSetting('b67861c2-020a-c65e-70c8-6bae3efa310f', 1);
-
-    // return listSettings();
 };
 
 module.exports = {
     handler
 };
 
-handler({}, {}, ()=>{})
-.then(result =>
-{
-    log("result:", result);
-})
-.catch(error =>
-{
-    log("error:", error);
-});
