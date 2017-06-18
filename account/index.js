@@ -5,7 +5,7 @@ const AWS      = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB({region: 'us-east-1'});
 const guid = require('../guid');
 
-const _createAccount = (dynamodb, name, amount) =>
+const _createAccount = (dynamodb, name, amount, type) =>
 {
     return new Promise((success, failure)=>
     {
@@ -15,6 +15,7 @@ const _createAccount = (dynamodb, name, amount) =>
                 id: {"S": guid()},
                 name: {"S": name},
                 amount: {"N": amount.toString()},
+                type: {"S": type},
                 creationDate: {"S": date.toString()}
             },
             ReturnConsumedCapacity: "TOTAL", 
@@ -56,6 +57,7 @@ const _listAccounts = dynamodb =>
                     id: _.get(item, 'id.S'),
                     name: _.get(item, 'name.S'),
                     amount: parseInt(_.get(item, 'amount.N')),
+                    type: _.get(item, 'type.S'),
                     creationDate: new Date(_.get(item, 'creationDate.S'))
                 };
             })
@@ -74,8 +76,11 @@ module.exports = {
     _listAccounts,
     _createAccount
 };
+// createAccount('Capital One 360 Checking', 524.13, 'checking')
+// .then(result => log("result:", result))
+// .catch(error => log("error:", error));
 
-// createAccount(dynamodb, 'cow', 2)
+// createAccount('Capital One 360 Savings', 2145.04, 'savings')
 // .then(result => log("result:", result))
 // .catch(error => log("error:", error));
 
