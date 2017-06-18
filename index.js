@@ -35,6 +35,7 @@ const getResponse = (data)=>
         // body: data,
         headers: {
             'Content-Type': 'application/json',
+            'Access-Control-Allow-Origin': '*'
         }
     }
 };
@@ -86,40 +87,30 @@ const handler = (event, context, callback) =>
     {
         return getErrorResponse(['No context was passed to the handler.']);
     }
-
-    if(_.has(event, 'body') === true)
+    const path = _.get(event, 'path');
+    log("path:", path);
+    Promise.resolve(true)
+    .then(()=>
     {
-        parseBody(event)
-        .then( body =>
+        switch(path)
         {
-            if(_.has(body, 'ping') === true)
-            {
-                return Promise.resolve('pong');
-            }
-            const path = _.get(body, 'path');
-            switch(path)
-            {
-                case '/user/list': return listUsers();
-                case '/account/list': return listAccounts();
-                case '/setting/list': return listSettings();   
-                case '/transaction/list': return listTransactions();
-                default:
-                    return Promise.reject(new Error('Unknown body.'));
-            }
-        })
-        .then(data =>
-        {
-            callback(undefined, getResponse(data));
-        })
-        .catch(error =>
-        {
-            callback(undefined, getErrorResponse([error]));
-        });
-    }
-    else
+            case '/api/user/list': return listUsers();
+            case '/api/account/list': return listAccounts();
+            case '/api/setting/list': return listSettings();   
+            case '/api/transaction/list': return listTransactions();
+            default:
+                return Promise.reject(new Error('Unknown path, you passed: ' + path));
+        }
+    })
+    .then(data =>
     {
-        callback(undefined, getResponse('pong')); 
-    }
+        log("data:", data);
+        callback(undefined, getResponse(data));
+    })
+    .catch(error =>
+    {
+        callback(undefined, getErrorResponse([error]));
+    });
 };
 
 module.exports = {
