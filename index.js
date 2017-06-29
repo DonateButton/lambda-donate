@@ -72,6 +72,19 @@ const parseBody = event =>
     }
 }
 
+const getDataFromPath = path =>
+{
+    switch(path)
+    {
+        case '/api/user/list': return listUsers();
+        case '/api/account/list': return listAccounts();
+        case '/api/setting/list': return listSettings();   
+        case '/api/transaction/list': return listTransactions();
+        default:
+            return Promise.resolve('Unknown path.');
+    }
+};
+
 const handler = (event, context, callback) =>
 {
     log("event:", event);
@@ -80,36 +93,28 @@ const handler = (event, context, callback) =>
 
     if(_.isNil(callback) === true)
     {
-        return getErrorResponse(['No callback was passed to the handler.']);
+        return Promise.resolve(getErrorResponse(['No callback was passed to the handler.']));
     }
 
     if(_.isNil(context) === true)
     {
-        return getErrorResponse(['No context was passed to the handler.']);
+        return Promise.resolve(getErrorResponse(['No context was passed to the handler.']));
     }
     const path = _.get(event, 'path');
-    log("path:", path);
-    Promise.resolve(true)
-    .then(()=>
-    {
-        switch(path)
-        {
-            case '/api/user/list': return listUsers();
-            case '/api/account/list': return listAccounts();
-            case '/api/setting/list': return listSettings();   
-            case '/api/transaction/list': return listTransactions();
-            default:
-                return Promise.reject(new Error('Unknown path, you passed: ' + path));
-        }
-    })
+    return getDataFromPath(path)
     .then(data =>
     {
-        log("data:", data);
-        callback(undefined, getResponse(data));
+        log("in 2nd then");
+        const response = getResponse(data);
+        callback(undefined, response);
+        return Promise.resolve(response);
     })
     .catch(error =>
     {
-        callback(undefined, getErrorResponse([error]));
+        log("in error");
+        const errorResponse = getErrorResponse([error]);
+        callback(undefined, errorResponse);
+        return Promise.reject(errorResponse);
     });
 };
 

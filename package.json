@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "mocha *.test.js",
+    "coverage": "istanbul cover _mocha *.test.js -x *.test.js",
+    "showcoverage": "open coverage/lcov-report/index.html",
     "makezip": "zip -r -X deploy.zip index.js guid.js account setting transaction user node_modules/lodash",
     "deletezip": "rm -f deploy.zip",
     "deploy": "npm run deletezip && npm run makezip && node build --destroy --build",
@@ -28,6 +30,7 @@
     "aws-sdk": "^2.53.0",
     "chai": "^3.5.0",
     "chai-as-promised": "^6.0.0",
+    "istanbul": "^0.4.5",
     "mocha": "^3.4.1"
   }
 }

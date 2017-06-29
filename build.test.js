@@ -88,7 +88,7 @@ describe('#deleteFunction', ()=>
 	});
 });
 
-describe.only('#getProgram', ()=>
+describe('#getProgram', ()=>
 {
 	it('should not build with no parameters', ()=>
 	{

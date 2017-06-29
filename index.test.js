@@ -1,11 +1,15 @@
 const expect = require("chai").expect;
 const should = require('chai').should();
+const chaiAsPromised = require('chai-as-promised');
+require('chai').use(chaiAsPromised);
 const _ = require('lodash');
 const {
     handler
 } = require('./index');
+const log = console.log;
 
 const responseLike = (o)=> _.isObjectLike(o) && _.has(o, 'statusCode') && _.has(o, 'body');
+const promiseLike = o => _.isObjectLike(o) && _.hasIn(o, 'then') && _.hasIn(o, 'catch');
 const responseSucceeded = (o)=>
 {
     try
@@ -23,20 +27,40 @@ describe('#index', ()=>
 {
     describe('#handler', ()=>
     {
-        it('returns a response with basic inputs', ()=>
+        it('returns a promise with basic inputs', ()=>
         {
             const response = handler({}, {}, ()=>{});
-            responseLike(response).should.be.true;
+            promiseLike(response).should.be.true;
         });
-        it('passing nothing is ok', ()=>
+        it('returns a response with basic inputs', done =>
         {
-            const response = handler();
-            responseLike(response).should.be.true;
+            handler({}, {}, ()=>{})
+            .then(result =>
+            {
+                responseLike(result).should.be.true;
+                done();
+            })
+            .catch(done);
         });
-        it('succeeds if event only has echo to true', ()=>
+        it('passing nothing is ok', done =>
         {
-            const response = handler({echo: true}, {}, ()=>{});
-            responseSucceeded(response).should.be.true;
+            handler()
+            .then(result =>
+            {
+                responseLike(result).should.be.true;
+                done();
+            })
+            .catch(done);
+        });
+        it('succeeds if event only has echo to true', done =>
+        {
+            handler({echo: true}, {}, ()=>{})
+            .then(result =>
+            {
+                responseSucceeded(result).should.be.true;
+                done();
+            })
+            .catch(done);
         });
     });
 });
