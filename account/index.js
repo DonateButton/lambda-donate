@@ -4,6 +4,56 @@ const log = console.log;
 const AWS      = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB({region: 'us-east-1'});
 const guid = require('../guid');
+const Validation = require('folktale/validation');
+const { Success, Failure } = Validation;
+const Result = require('folktale/result');
+const validationToResult = require('folktale/conversions/validation-to-result');
+
+const validString = o => _.isString(o) && o.length > 0;
+const validNumber = o => _.isNumber(o) && _.isNaN(o) === false;
+const validDate = o => _.isDate(o) && o.toString() !== 'Invalid Date';
+
+const isSavingsString = o => _.isString(o) && o.toLowerCase() === 'savings';
+const isCheckingString = o => _.isString(o) && o.toLowerCase() === 'checking';
+const isCheckingOrSavingsString = o => isSavingsString(o) || isCheckingString(o);
+
+const validName = name =>
+    validString(name) ? Success(name)
+    : /* otherwise */   Failure(['Name must be a string and not blank.']);
+
+const validAmount = amount =>
+    validNumber(amount) ? Success(amount)
+    : /* otherwise */ Failure(['Amount must be a number and not NaN.']);
+
+const validType = type =>
+  isCheckingOrSavingsString(type) ? Success(type)
+: /* otherwise */                   Failure(['Type must be savings or checking, all lowercase.']);
+
+const validCreationDate = date =>
+    validDate(date) ? Success(date)
+    : /* otherwise */   Failure(['Creation date must be a valid date.']);
+
+const getDynamoPutArgsValid = (name, amount, type, date) =>
+    Success().concat(validName(name))
+             .concat(validAmount(amount))
+             .concat(validType(type))
+             .concat(validCreationDate(date));
+
+const getDynamoPut = (name, amount, type, date) =>
+    getDynamoPutArgsValid(name, amount, type, date)
+    .map(_ => ({
+            Item: {
+                id: {"S": guid()},
+                name: {"S": name},
+                amount: {"N": amount.toString()},
+                type: {"S": type},
+                creationDate: {"S": date.toString()}
+            },
+            ReturnConsumedCapacity: "TOTAL", 
+            TableName: "button_accounts"
+        })
+    )
+    .mapFailure(validationToResult);
 
 const _createAccount = (dynamodb, name, amount, type) =>
 {
@@ -74,7 +124,9 @@ module.exports = {
     createAccount,
     listAccounts,
     _listAccounts,
-    _createAccount
+    _createAccount,
+    getDynamoPutArgsValid,
+    getDynamoPut
 };
 // createAccount('Capital One 360 Checking', 524.13, 'checking')
 // .then(result => log("result:", result))

@@ -4,7 +4,7 @@
   "description": "Donate's money and sends a text message.",
   "main": "index.js",
   "scripts": {
-    "test": "mocha *.test.js",
+    "test": "mocha *.test.js account/*.test.js",
     "coverage": "istanbul cover _mocha *.test.js -x *.test.js",
     "showcoverage": "open coverage/lcov-report/index.html",
     "makezip": "zip -r -X deploy.zip index.js guid.js account setting transaction user node_modules/lodash",
@@ -24,6 +24,7 @@
   },
   "homepage": "https://github.com/DonateButton/lambda-donate#readme",
   "dependencies": {
+    "folktale": "^2.0.0-rc1",
     "lodash": "^4.17.4"
   },
   "devDependencies": {

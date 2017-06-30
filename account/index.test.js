@@ -1,3 +1,4 @@
+const log = console.log;
 const chai = require('chai');
 const expect = chai.expect;
 const should = chai.should();
@@ -6,7 +7,9 @@ chai.use(chaiAsPromised);
 const _ = require('lodash');
 const {
     createAccount,
-    listAccounts
+    listAccounts,
+    getDynamoPutArgsValid,
+    getDynamoPut
 } = require('./index');
 
 const responseLike = (o)=> _.isObjectLike(o) && _.has(o, 'statusCode') && _.has(o, 'body');
@@ -37,6 +40,23 @@ describe('#index', ()=>
         it('fails with bad inputs', ()=>
         {
             return createAccount(mockDynamo).should.be.rejected;
+        });
+    });
+
+    describe("#getDynamoPutArgsValid", ()=>
+    {
+        it('dem args', done =>
+        {
+            getDynamoPutArgsValid('cow', 100, 'savings', new Date())
+            .matchWith({
+                Success: ({ value }) => done(),
+                Failure: done
+            });
+        });
+        it('cow', () =>
+        {
+            getDynamoPut('cow', 100, 'savings', new Date())
+            .getOrElse('not found').should.not.equal('not found');
         });
     });
 });
