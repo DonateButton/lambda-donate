@@ -5,7 +5,7 @@ const AWS      = require('aws-sdk');
 const dynamodb = new AWS.DynamoDB({region: 'us-east-1'});
 const guid = require('../guid');
 
-const _createUser = (dynamodb, firstName, lastName, avatarURL) =>
+const _createUser = (dynamodb, firstName, lastName, username, password, avatarURL) =>
 {
     return new Promise((success, failure)=>
     {
@@ -15,6 +15,9 @@ const _createUser = (dynamodb, firstName, lastName, avatarURL) =>
                 id: {"S": guid()},
                 firstName: {"S": firstName},
                 lastName: {"S": lastName},
+                username: {"S": username},
+                password: {"S": password},
+                avatarURL: {"S": avatarURL},
                 creationDate: {"S": date.toString()}
             },
             ReturnConsumedCapacity: "TOTAL", 
@@ -56,6 +59,9 @@ const _listUsers = dynamodb =>
                     id: _.get(item, 'id.S'),
                     firstName: _.get(item, 'firstName.S'),
                     lastName: _.get(item, 'lastName.S'),
+                    username: _.get(item, 'username.S'),
+                    avatarURL: _.get(item, 'avatarURL.S'),
+                    password: _.get(item, 'password.S'),
                     creationDate: new Date(_.get(item, 'creationDate.S'))
                 };
             })
@@ -65,19 +71,30 @@ const _listUsers = dynamodb =>
     }); 
 };
 
+const sanitizeUser = user =>
+{
+    return {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        username: user.username,
+        avatarURL: user.avatarURL
+    };
+};
+
 const createUser = _.partial(_createUser, dynamodb);
 const listUsers = _.partial(_listUsers, dynamodb);
 module.exports = {
     createUser,
     listUsers,
     _createUser,
-    _listUsers
+    _listUsers,
+    sanitizeUser
 };
 
-// createUser(dynamodb, 'Jesse', 'Cow', '')
+// createUser('Jesse', 'Cow', 'jesterxl', 'password', '')
 // .then(result => log("result:", result))
 // .catch(error => log("error:", error));
 
-// listUsers(dynamodb)
+// listUsers()
 // .then(result => log("result:", result))
 // .catch(error => log("error:", error));
