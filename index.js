@@ -4,7 +4,8 @@ const log = console.log;
 const AWS      = require('aws-sdk');
 const sns = new AWS.SNS();
 const {
-    listUsers
+    listUsers,
+    sanitizeUser
 } = require('./user');
 const {
     listAccounts
@@ -70,13 +71,50 @@ const parseBody = event =>
     {
         return Promise.error(err);
     }
-}
+};
 
-const getDataFromPath = path =>
+const login = body =>
+    new Promise((success, failure)=>
+    {
+        try
+        {
+            const bodyData = JSON.parse(body);
+            const username = _.get(bodyData, 'username');
+            const password = _.get(bodyData, 'password');
+            listUsers()
+            .then(users =>
+            {
+                log("username:", username);
+                log("password:", password);
+                log("users:", users);
+                const foundUser = _.find(users, user => user.username === username && user.password === password);
+                log("foundUser:", foundUser);
+                if(_.isUndefined(foundUser))
+                {
+                    failure(new Error(`No user found for ${username}`));
+                }
+                else
+                {
+                    success(sanitizeUser(foundUser));
+                }
+            })
+            .catch(err =>
+            {
+                failure(new Error("Unknonwn error: " + err));
+            });
+        }
+        catch(err)
+        {
+            failure(err);
+        }
+    });
+
+const getDataFromPath = (path, body) =>
 {
     switch(path)
     {
         case '/api/user/list': return listUsers();
+        case '/api/user/login': return login(body);
         case '/api/account/list': return listAccounts();
         case '/api/setting/list': return listSettings();   
         case '/api/transaction/list': return listTransactions();
@@ -101,7 +139,7 @@ const handler = (event, context, callback) =>
         return Promise.resolve(getErrorResponse(['No context was passed to the handler.']));
     }
     const path = _.get(event, 'path');
-    return getDataFromPath(path)
+    return getDataFromPath(path, _.get(event, 'body'))
     .then(data =>
     {
         log("in 2nd then");
